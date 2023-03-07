@@ -4,7 +4,7 @@ set -euo pipefail
 
 count=1
 
-OUT_FILE=./_dump_extract
+OUT_FILE=./._dump_extract
 
 find "$1" -type f \( -not -path '*/__pycache__/*' \
                   -not -path '*/.mypy_cache/*' \

@@ -11,11 +11,14 @@ args = parser.parse_args()
 
 username, repo_name = args.repository.split("/")
 
+if os.path.isdir(repo_dir):
+    print(f"The directory {repo_dir} already exists.")
+    sys.exit(1)
+
+
 repo_url = f"git@github.com:{username}/{args.directory or repo_name}.git"
 repo_dir = os.path.join(os.getcwd(), args.directory or repo_name)
 
-if os.path.isdir(repo_dir):
-    print(f"The directory {repo_dir} already exists.")
 
 os.chdir(os.path.join(os.getcwd(), "."))
 subprocess.run(["git", "clone", "-b", args.branch, repo_url, repo_dir], check=True)
