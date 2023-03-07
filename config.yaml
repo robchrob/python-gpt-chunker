@@ -1,0 +1,3 @@
+config:
+  MAX_TOKENS: 1024 # ~3/4 word
+  MAX_CHUNK_SIZE: 4098 # in bytes

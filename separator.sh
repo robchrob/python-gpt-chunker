@@ -1,25 +1,27 @@
 #!/bin/bash
 
-# Set max chunk size (in bytes)
-MAX_CHUNK_SIZE=3600
+eval $(python3 -c 'import yaml; print("MAX_CHUNK_SIZE=" + str(yaml.safe_load(open("config.yaml"))["config"]["MAX_CHUNK_SIZE"]))')
+eval $(python3 -c 'import yaml; print("MAX_TOKENS=" + str(yaml.safe_load(open("config.yaml"))["config"]["MAX_TOKENS"]))')
 
-# Set max tokens per chunk (1 token ~ 3/4 of a word)
-MAX_TOKENS=1200
+echo "MAX_CHUNK_SIZE: $MAX_CHUNK_SIZE"
+echo "MAX_TOKENS: $MAX_TOKENS"
 
-# Get input file
-INPUT_FILE="$1"
+INPUT_FILE="$2"
 
-# Create directory to store chunks
-DIR=$(date +"%Y-%m-%d-%H-%M-%S")
-mkdir -p "./chunks/$DIR"
+TIMESTAMP=$(date +"%Y-%m-%d-%H-%M-%S")
+CHUNK_DIR="./.repo/$1/chunks/$TIMESTAMP"
+
+mkdir -p "$CHUNK_DIR"
 
 # Get total size of input file
 TOTAL_SIZE=$(wc -c < "$INPUT_FILE")
+echo "TOTAL_SIZE: $TOTAL_SIZE"
 
 # Calculate total number of chunks needed
 TOTAL_CHUNKS=$((($TOTAL_SIZE + $MAX_CHUNK_SIZE - 1) / $MAX_CHUNK_SIZE))
+echo "TOTAL_CHUNKS: $TOTAL_CHUNKS"
 
-# Split input file into chunks
+
 for ((i=0; i<$TOTAL_CHUNKS; i++)); do
   # Calculate offset for current chunk
   OFFSET=$(($i * $MAX_CHUNK_SIZE))
@@ -56,10 +58,10 @@ for ((i=0; i<$TOTAL_CHUNKS; i++)); do
       SUB_CHUNK=$(echo "$CHUNK" | awk -v start=$(($SUB_OFFSET + 1)) -v end=$(($SUB_OFFSET + $TOKENS_TO_KEEP)) '{ for (i=start; i<=end; i++) printf("%s ", $i); }')
 
       # Save sub-chunk to file
-      echo "$SUB_CHUNK" > "./chunks/$DIR/chunk_${i}_$j"
+      echo "$SUB_CHUNK" > "$CHUNK_DIR/${1}_${i}"
     done
   else
     # Save chunk to file
-    echo "$CHUNK" > "./chunks/$DIR/chunk_$i"
+    echo "$CHUNK" > "$CHUNK_DIR/${1}_${i}"
   fi
 done
